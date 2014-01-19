@@ -41,8 +41,9 @@ type Release struct {
 	Version int `json:"version"`
 }
 
-func NewSlug(slugDir string) *Slug {
+func NewSlug(apiKey, slugDir string) *Slug {
 	slugJson := &Slug{}
+	slugJson.apiKey = apiKey
 	slugJson.slugDir = slugDir
 
 	client := &http.DefaultClient
