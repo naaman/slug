@@ -2,7 +2,6 @@ package slug
 
 import (
 	"archive/tar"
-	"code.google.com/p/go-netrc/netrc"
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
@@ -12,7 +11,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/user"
 	"path/filepath"
 	"strings"
 	"time"
@@ -31,8 +29,7 @@ type Slug struct {
 	UpdatedAt    time.Time         `json:"updated_at"`
 	slugDir      string
 	httpClient   *http.Client
-	release      *Release
-	tarFile      *os.File
+	TarFile      *os.File
 	apiKey       string
 	appName      string
 }
@@ -41,9 +38,10 @@ type Release struct {
 	Version int `json:"version"`
 }
 
-func NewSlug(apiKey, slugDir string) *Slug {
+func NewSlug(apiKey, appName, slugDir string) *Slug {
 	slugJson := &Slug{}
 	slugJson.apiKey = apiKey
+	slugJson.appName = appName
 	slugJson.slugDir = slugDir
 
 	client := &http.DefaultClient
@@ -58,24 +56,24 @@ func NewSlug(apiKey, slugDir string) *Slug {
 }
 
 func (s *Slug) Archive() {
-	s.tarFile = tarGz(strings.TrimRight(s.slugDir, "/"))
+	s.TarFile = tarGz(strings.TrimRight(s.slugDir, "/"))
 }
 
 func (s *Slug) Push() {
 	_, err := s.httpClient.Do(s.putSlug())
-	defer s.tarFile.Close()
+	defer s.TarFile.Close()
 	if err != nil {
 		panic(err)
 	}
 }
 
-func (s *Slug) Release() {
+func (s *Slug) Release() *Release {
 	res, _ := s.httpClient.Do(s.createRelease())
 	bod, _ := ioutil.ReadAll(res.Body)
 	defer res.Body.Close()
 	releaseJson := &Release{}
 	json.Unmarshal(bod, &releaseJson)
-	s.release = releaseJson
+	return releaseJson
 }
 
 func (s *Slug) herokuReq(method string, resource string, body string) *http.Request {
@@ -109,8 +107,8 @@ func (s *Slug) createRelease() *http.Request {
 }
 
 func (s *Slug) putSlug() *http.Request {
-	tarFileStat, err := s.tarFile.Stat()
-	tarFile, _ := os.Open(s.tarFile.Name())
+	tarFileStat, err := s.TarFile.Stat()
+	tarFile, _ := os.Open(s.TarFile.Name())
 	if err != nil {
 		panic(err)
 	}
@@ -186,17 +184,4 @@ func tarGz(inPath string) *os.File {
 
 	os.Chdir(wd)
 	return fw
-}
-
-func netrcApiKey() string {
-	if u, err := user.Current(); err == nil {
-		netrcPath := u.HomeDir + "/.netrc"
-		if _, err := os.Stat(netrcPath); err == nil {
-			key, _ := netrc.FindMachine(netrcPath, "api.heroku.com")
-			if key.Password != "" {
-				return key.Password
-			}
-		}
-	}
-	return ""
 }
