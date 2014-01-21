@@ -4,8 +4,9 @@ Makes slugs
 ## Usage
 
 ```term
-myslug := slug.NewSlug(herokuApiKey, "/path/to/slug")
+myslug := slug.NewSlug(apiKey, appName, sourceDir)
 myslug.Archive()
 myslug.Push()
-myslug.Release()
+release := s.Release()
+fmt.Printf("done (v%d)", release.Version)
 ```
