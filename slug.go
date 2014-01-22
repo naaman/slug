@@ -29,7 +29,7 @@ type Slug struct {
 	UpdatedAt    time.Time         `json:"updated_at"`
 	slugDir      string
 	httpClient   *http.Client
-	TarFile      *os.File
+	tarFile      *os.File
 	apiKey       string
 	appName      string
 }
@@ -56,13 +56,13 @@ func NewSlug(apiKey, appName, slugDir string) *Slug {
 }
 
 func (s *Slug) Archive() *os.File {
-	s.TarFile = tarGz(strings.TrimRight(s.slugDir, "/"))
-	return s.TarFile
+	s.tarFile = tarGz(strings.TrimRight(s.slugDir, "/"))
+	return s.tarFile
 }
 
 func (s *Slug) Push() error {
 	_, err := s.httpClient.Do(s.putSlug())
-	defer s.TarFile.Close()
+	defer s.tarFile.Close()
 	return err
 }
 
@@ -106,8 +106,8 @@ func (s *Slug) createRelease() *http.Request {
 }
 
 func (s *Slug) putSlug() *http.Request {
-	tarFileStat, err := s.TarFile.Stat()
-	tarFile, _ := os.Open(s.TarFile.Name())
+	tarFileStat, err := s.tarFile.Stat()
+	tarFile, _ := os.Open(s.tarFile.Name())
 	if err != nil {
 		panic(err)
 	}
