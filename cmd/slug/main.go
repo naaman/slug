@@ -35,8 +35,8 @@ func main() {
 	fmt.Printf("Initializing slug for %s...", workingDir)
 	s := slug.NewSlug(*fApiKey, *fAppName, workingDir)
 	fmt.Printf("done\nArchiving %s...", workingDir)
-	s.Archive()
-	fmt.Printf("done\nPushing %s...", s.TarFile.Name())
+	tarFile := s.Archive()
+	fmt.Printf("done\nPushing %s...", tarFile.Name())
 	s.Push()
 	fmt.Printf("done\n")
 	if *fRelease {
