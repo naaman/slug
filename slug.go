@@ -55,16 +55,15 @@ func NewSlug(apiKey, appName, slugDir string) *Slug {
 	return slugJson
 }
 
-func (s *Slug) Archive() {
+func (s *Slug) Archive() *os.File {
 	s.TarFile = tarGz(strings.TrimRight(s.slugDir, "/"))
+	return s.TarFile
 }
 
-func (s *Slug) Push() {
+func (s *Slug) Push() error {
 	_, err := s.httpClient.Do(s.putSlug())
 	defer s.TarFile.Close()
-	if err != nil {
-		panic(err)
-	}
+	return err
 }
 
 func (s *Slug) Release() *Release {
