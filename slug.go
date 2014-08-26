@@ -55,6 +55,10 @@ func NewSlug(apiKey, appName, slugDir string) *Slug {
 	return slugJson
 }
 
+func (s *Slug) SetArchive(tarball *os.File) {
+	s.tarFile = tarball
+}
+
 func (s *Slug) Archive() *os.File {
 	s.tarFile = tarGz(strings.TrimRight(s.slugDir, "/"))
 	return s.tarFile
