@@ -5,7 +5,6 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
-	"github.com/naaman/pf"
 	"io"
 	"io/ioutil"
 	"log"
@@ -14,6 +13,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/naaman/pf"
 )
 
 type ProcessTable struct {
@@ -55,8 +56,8 @@ func NewSlug(apiKey, appName, slugDir string) *Slug {
 	return slugJson
 }
 
-func (s *Slug) SetArchive(tarball *os.File) {
-	s.tarFile = tarball
+func (s *Slug) SetArchive(f *os.File) {
+	s.tarFile = f
 }
 
 func (s *Slug) Archive() *os.File {
@@ -115,7 +116,7 @@ func (s *Slug) putSlug() *http.Request {
 	if err != nil {
 		panic(err)
 	}
-	req, _ := http.NewRequest("PUT", s.Blob["put"], tarFile)
+	req, _ := http.NewRequest("PUT", s.Blob["url"], tarFile)
 	req.ContentLength = tarFileStat.Size()
 	return req
 }
