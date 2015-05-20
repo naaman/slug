@@ -45,13 +45,13 @@ func NewSlug(apiKey, appName, slugDir string) *Slug {
 	slugJson.appName = appName
 	slugJson.slugDir = slugDir
 
-	client := &http.DefaultClient
+	client := http.DefaultClient
 	res, _ := client.Do(slugJson.createSlug())
 	bod, _ := ioutil.ReadAll(res.Body)
 	defer res.Body.Close()
 
 	json.Unmarshal(bod, &slugJson)
-	slugJson.httpClient = *client
+	slugJson.httpClient = client
 	slugJson.slugDir = slugDir
 	return slugJson
 }
